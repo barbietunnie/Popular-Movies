@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_movie_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/movie_details_title_text_size"
+        android:padding="@dimen/movie_details_title_padding"
+        android:background="@color/colorTextBg"
+        android:textColor="@color/colorWhiteText"
+        android:text="Beauty and the Beast" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/iv_movie_poster"
+            android:layout_width="@dimen/movie_details_poster_width"
+            android:layout_height="@dimen/movie_details_poster_height"
+            android:layout_margin="@dimen/movie_details_poster_margin"
+            android:layout_weight="0"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/tv_release_date"
+                android:text="2015"
+                android:textSize="@dimen/movie_details_release_date_text_size"
+                android:padding="@dimen/movie_details_release_date_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/tv_user_rating"
+                android:text="2015"
+                android:textSize="@dimen/movie_details_rating_text_size"
+                android:padding="@dimen/movie_details_rating_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_movie_synopsis"
+        android:text="A live-action adaptation of Disney's version of the classic 'Beauty and the Beast' tale of a cursed prince and a beautiful young woman who helps him break the spell"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/movie_details_synopsis_text_size"
+        android:lineSpacingMultiplier="1.4"/>
+
+
+</LinearLayout>

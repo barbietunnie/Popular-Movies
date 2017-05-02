@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.xuxperience.popularmovies.activities.MainActivity">
+
+    <GridView
+        android:id="@+id/gv_movies_list"
+        android:visibility="invisible"
+        android:columnWidth="@dimen/movie_item_width"
+        android:numColumns="auto_fit"
+        android:horizontalSpacing="@dimen/movie_list_horizontal_spacing"
+        android:verticalSpacing="@dimen/movie_list_vertical_spacing"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></GridView>
+
+    <ProgressBar
+        android:id="@+id/pb_loading_indicator"
+        android:visibility="visible"
+        android:layout_gravity="center"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <TextView
+        android:id="@+id/tv_error_message_display"
+        android:padding="@dimen/error_padding"
+        android:textColor="@color/colorError"
+        android:textSize="@dimen/error_textSize"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</FrameLayout>
