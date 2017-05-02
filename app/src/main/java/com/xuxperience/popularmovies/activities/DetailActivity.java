@@ -10,6 +10,9 @@ import com.squareup.picasso.Picasso;
 import com.xuxperience.popularmovies.AppConstants;
 import com.xuxperience.popularmovies.R;
 import com.xuxperience.popularmovies.models.MovieItem;
+import com.xuxperience.popularmovies.utilities.PopularMoviesDateUtils;
+
+import java.text.ParseException;
 
 public class DetailActivity extends BaseActivity {
     public static final String LOG_TAG = DetailActivity.class.getSimpleName();
@@ -40,7 +43,18 @@ public class DetailActivity extends BaseActivity {
                 MovieItem movieItem = movieBundle.getParcelable(AppConstants.MOVIE_INTENT_KEY);
                 if(null != movieItem) {
                     mMovieTitleTextView.setText(movieItem.getTitle());
-                    mReleaseDateTextView.setText(movieItem.getReleaseDate());
+
+                    String releaseDate = movieItem.getReleaseDate();
+
+                    try {
+                        Integer dateYr = PopularMoviesDateUtils.getYear(releaseDate);
+                        mReleaseDateTextView.setText(dateYr.toString());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        mReleaseDateTextView.setText("-");
+                    }
+
+
                     mUserRatingTextView.setText(movieItem.getUserRating().toString() + "/10");
                     mSynopsisTextView.setText(movieItem.getSynopsis());
 

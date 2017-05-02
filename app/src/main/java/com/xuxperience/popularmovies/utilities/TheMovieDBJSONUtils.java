@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Created by badeyemi on 4/30/17.
  */
 
-public class TheMovieDBJSONUtils {
+public final class TheMovieDBJSONUtils {
     public static final String TMDB_POSTER_THUMBNAIL_BASE_URL = "http://image.tmdb.org/t/p/";
     public static final String TMDB_PREFERRED_FILE_SIZE = "w185";
 

@@ -80,4 +80,8 @@ public class MoviesAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+    public ArrayList<MovieItem> getMoviesList() {
+        return moviesList;
+    }
 }

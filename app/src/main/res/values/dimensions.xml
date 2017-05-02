@@ -20,8 +20,9 @@
     <dimen name="movie_details_poster_margin">20dp</dimen>
     <dimen name="movie_details_release_date_text_size">21sp</dimen>
     <dimen name="movie_details_release_date_padding">12dp</dimen>
-    <dimen name="movie_details_rating_text_size">18sp</dimen>
-    <dimen name="movie_details_rating_padding">12dp</dimen>
+    <dimen name="movie_details_rating_text_size">16sp</dimen>
+    <dimen name="movie_details_rating_padding">8dp</dimen>
     <dimen name="movie_details_synopsis_padding">12dp</dimen>
-    <dimen name="movie_details_synopsis_text_size">14dp</dimen>
+    <dimen name="movie_details_synopsis_text_size">16dp</dimen>
+    <dimen name="movie_details_star_size">28dp</dimen>
 </resources>

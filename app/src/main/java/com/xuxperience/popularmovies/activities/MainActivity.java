@@ -3,13 +3,8 @@ package com.xuxperience.popularmovies.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -29,8 +24,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends BaseActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends BaseActivity implements AdapterView.OnItemClickListener{
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    public static final String BUNDLE_ADAPTER_ITEMS = "movies";
+    public static final String BUNDLE_SCROLL_POSITION = "scrollPos";
+
+    // The movie sort order before state change
+    public static final String BUNDLE_SORT_ORDER = "sortOrder";
 
     private GridView mGridView;
     private ProgressBar mLoadingIndicator;
@@ -48,11 +49,26 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
 
-        loadMoviesData();
+        restoreMoviesList(savedInstanceState);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        if(outState != null) {
+            outState.putParcelableArrayList(BUNDLE_ADAPTER_ITEMS, mMoviesAdapter.getMoviesList());
+
+            int scrollPosition = mGridView.getFirstVisiblePosition();
+
+            outState.putInt(BUNDLE_SCROLL_POSITION, scrollPosition);
+
+            // Save the current sort order
+            outState.putString(BUNDLE_SORT_ORDER,
+                    getSharedPreferences().getString(
+                            getString(R.string.pref_sort_key),
+                            getString(R.string.pref_sort_default_value)
+                    ));
+        }
+
         super.onSaveInstanceState(outState);
     }
 
@@ -60,16 +76,39 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
+        restoreMoviesList(savedInstanceState);
+    }
 
+    /**
+     * Restores the list of movies from the saved bundle
+     *
+     * @param savedInstanceState The saved bundle state
+     */
+    private void restoreMoviesList(Bundle savedInstanceState) {
+        boolean loaded = false;
+
+        if(savedInstanceState != null) {
+            ArrayList<MovieItem> moviesList = savedInstanceState.getParcelableArrayList(BUNDLE_ADAPTER_ITEMS);
+            if(moviesList != null && moviesList.size() > 0) {
+                onLoadFinished(moviesList);
+
+                loaded = true;
+
+                // Restore the scroll position
+                int scrollPosition = savedInstanceState.getInt(BUNDLE_SCROLL_POSITION);
+                if(scrollPosition > 0) {
+                    mGridView.smoothScrollToPosition(scrollPosition);
+                }
+            }
+        }
+
+        if(!loaded) {
+//            Log.d(LOG_TAG, "No saved movies found");
+            loadMoviesData();
+        }
     }
 
     private void loadMoviesData() {
-        Log.d(LOG_TAG, "Default preference: " + getSharedPreferences().getString(
-                getString(R.string.pref_sort_key),
-                getString(R.string.pref_sort_default_value)
-        ));
-
-//        URL moviesURL = NetworkUtils.buildURL(NetworkUtils.SortOrderType.MOST_POPULAR);
         URL moviesURL = NetworkUtils.buildURL(getSharedPreferences().getString(
                 getString(R.string.pref_sort_key),
                 getString(R.string.pref_sort_default_value)
@@ -118,13 +157,10 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MovieItem selectedMovieItem = mMoviesAdapter.getItem(position);
 
-//        Log.d(LOG_TAG, "Selected movie: " + selectedMovieItem);
-
         Intent detailActivityIntent = new Intent(this, DetailActivity.class);
         detailActivityIntent.putExtra(AppConstants.MOVIE_INTENT_KEY, selectedMovieItem);
         startActivity(detailActivityIntent);
     }
-
     class TheMovieDBAPITask extends AsyncTask<URL, Void, ArrayList<MovieItem>> {
 
         @Override

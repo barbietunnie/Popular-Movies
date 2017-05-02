@@ -19,12 +19,12 @@ import java.util.Scanner;
  * Created by badeyemi on 4/30/17.
  */
 
-public class NetworkUtils {
+public final class NetworkUtils {
     public static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
     public static final String THEMOVIEDB_BASE_URL = "http://api.themoviedb.org/3/movie/";
     public static final String PARAM_API_KEY = "api_key";
-    public static final String apiKey = "81aaf16b421af02ee2c360643af4d3c4";
+    public static final String API_KEY = "<insert API key here>";
 
     /** The query strings for the different movie endpoints */
     public static final String MOST_POPULAR_ENDPOINT = "popular";
@@ -53,7 +53,7 @@ public class NetworkUtils {
         endpoint = type;
         Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL).buildUpon()
                         .appendPath(endpoint)
-                        .appendQueryParameter(PARAM_API_KEY, apiKey)
+                        .appendQueryParameter(PARAM_API_KEY, API_KEY)
                         .build();
 
         Log.d(LOG_TAG, "Built URI: " + builtUri);
