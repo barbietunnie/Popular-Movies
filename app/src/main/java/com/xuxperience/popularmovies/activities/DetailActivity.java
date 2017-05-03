@@ -39,7 +39,7 @@ public class DetailActivity extends BaseActivity {
         if(parentIntent != null) {
             Bundle movieBundle = parentIntent.getExtras();
 
-            if(movieBundle != null) {
+            if(movieBundle != null && movieBundle.containsKey(AppConstants.MOVIE_INTENT_KEY)) {
                 MovieItem movieItem = movieBundle.getParcelable(AppConstants.MOVIE_INTENT_KEY);
                 if(null != movieItem) {
                     mMovieTitleTextView.setText(movieItem.getTitle());
