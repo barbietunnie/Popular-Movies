@@ -40,6 +40,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     private TextView mErrorMessageDisplay;
 
     private MoviesAdapter mMoviesAdapter;
+    private static String currentSortOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,42 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
 
+        currentSortOrder = getCurrentSortOrder();
+
         restoreMoviesList(savedInstanceState);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        currentSortOrder = getCurrentSortOrder();
+
+        Log.d(LOG_TAG, "Current sort order: " + currentSortOrder);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        Log.d(LOG_TAG, "Previous sort order: " + currentSortOrder);
+//        Log.d(LOG_TAG, "Current sort order: " + getSharedPreferences().getString(
+//                getString(R.string.pref_sort_key),
+//                getString(R.string.pref_sort_default_value)
+//        ));
+
+        String previousSortOrder = currentSortOrder;
+        currentSortOrder = getSharedPreferences().getString(
+                getString(R.string.pref_sort_key),
+                getString(R.string.pref_sort_default_value)
+        );
+
+        if(previousSortOrder != null && mMoviesAdapter != null) {
+            if(!previousSortOrder.equals(currentSortOrder) || mMoviesAdapter.getCount() == 0) {
+                Log.i(LOG_TAG, "Loading new data from onResume");
+                loadMoviesData();
+            }
+        }
     }
 
     @Override
@@ -111,6 +147,8 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     private void loadMoviesData() {
+        showLoadingIndicator();
+
         URL moviesURL = NetworkUtils.buildURL(getSharedPreferences().getString(
                 getString(R.string.pref_sort_key),
                 getString(R.string.pref_sort_default_value)
@@ -142,6 +180,15 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     /**
+     * Show the loading indicator and hide the other components
+     */
+    private void showLoadingIndicator() {
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mGridView.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    /**
      * Called when the movies have been loaded from theMovieDB
      */
     public void onLoadFinished(ArrayList<MovieItem> movies) {
@@ -164,8 +211,24 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         startActivity(detailActivityIntent);
     }
 
+    /**
+     * Callback that is invoked when TheMovieDBAPITask completes
+     * @param items
+     */
     @Override
     public void onTaskComplete(ArrayList<MovieItem> items) {
         onLoadFinished(items);
+    }
+
+    /**
+     * Gets the current setting of the sort order
+     *
+     * @return The current sort order
+     */
+    public String getCurrentSortOrder() {
+        return getSharedPreferences().getString(
+                getString(R.string.pref_sort_key),
+                getString(R.string.pref_sort_default_value)
+        );
     }
 }
