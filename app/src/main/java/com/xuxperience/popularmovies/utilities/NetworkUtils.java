@@ -6,6 +6,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
+import com.xuxperience.popularmovies.BuildConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -24,16 +26,10 @@ public final class NetworkUtils {
 
     public static final String THEMOVIEDB_BASE_URL = "http://api.themoviedb.org/3/movie/";
     public static final String PARAM_API_KEY = "api_key";
-    public static final String API_KEY = "81aaf16b421af02ee2c360643af4d3c4";
 
     /** The query strings for the different movie endpoints */
     public static final String MOST_POPULAR_ENDPOINT = "popular";
     public static final String HIGHEST_RATED_ENDPOINT = "top_rated";
-
-//    public enum SortOrderType {
-//        MOST_POPULAR,
-//        HIGHEST_RATED
-//    }
 
     /**
      * Builds the URL used to fetch movies
@@ -44,16 +40,10 @@ public final class NetworkUtils {
     public static URL buildURL(String type) {
         String endpoint = null;
 
-//        if(type.equals(SortOrderType.MOST_POPULAR)) {
-//            endpoint = MOST_POPULAR_ENDPOINT;
-//        } else {
-//            endpoint = HIGHEST_RATED_ENDPOINT;
-//        }
-
         endpoint = type;
         Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL).buildUpon()
                         .appendPath(endpoint)
-                        .appendQueryParameter(PARAM_API_KEY, API_KEY)
+                        .appendQueryParameter(PARAM_API_KEY, BuildConfig.THE_MOVIE_DB_API_KEY)
                         .build();
 
         Log.d(LOG_TAG, "Built URI: " + builtUri);
