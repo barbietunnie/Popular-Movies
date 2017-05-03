@@ -24,7 +24,7 @@ public final class NetworkUtils {
 
     public static final String THEMOVIEDB_BASE_URL = "http://api.themoviedb.org/3/movie/";
     public static final String PARAM_API_KEY = "api_key";
-    public static final String API_KEY = "<insert API key here>";
+    public static final String API_KEY = "81aaf16b421af02ee2c360643af4d3c4";
 
     /** The query strings for the different movie endpoints */
     public static final String MOST_POPULAR_ENDPOINT = "popular";

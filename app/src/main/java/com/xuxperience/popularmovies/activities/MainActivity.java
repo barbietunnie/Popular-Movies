@@ -14,8 +14,9 @@ import android.widget.TextView;
 import com.xuxperience.popularmovies.AppConstants;
 import com.xuxperience.popularmovies.R;
 import com.xuxperience.popularmovies.adapters.MoviesAdapter;
+import com.xuxperience.popularmovies.listeners.AsyncTaskCompleteListener;
 import com.xuxperience.popularmovies.models.MovieItem;
-import com.xuxperience.popularmovies.utilities.TheMovieDBJSONUtils;
+import com.xuxperience.popularmovies.tasks.TheMovieDBAPITask;
 import com.xuxperience.popularmovies.utilities.NetworkUtils;
 
 import org.json.JSONException;
@@ -24,7 +25,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends BaseActivity implements AdapterView.OnItemClickListener{
+public class MainActivity extends BaseActivity implements AdapterView.OnItemClickListener,
+        AsyncTaskCompleteListener<ArrayList<MovieItem>> {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String BUNDLE_ADAPTER_ITEMS = "movies";
@@ -54,7 +56,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if(outState != null) {
+        super.onSaveInstanceState(outState);
+
+        if(outState != null && mMoviesAdapter != null) {
             outState.putParcelableArrayList(BUNDLE_ADAPTER_ITEMS, mMoviesAdapter.getMoviesList());
 
             int scrollPosition = mGridView.getFirstVisiblePosition();
@@ -68,8 +72,6 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
                             getString(R.string.pref_sort_default_value)
                     ));
         }
-
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -113,7 +115,7 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
                 getString(R.string.pref_sort_key),
                 getString(R.string.pref_sort_default_value)
         ));
-        new TheMovieDBAPITask().execute(moviesURL);
+        new TheMovieDBAPITask(this, this).execute(moviesURL);
     }
 
     /**
@@ -161,35 +163,9 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         detailActivityIntent.putExtra(AppConstants.MOVIE_INTENT_KEY, selectedMovieItem);
         startActivity(detailActivityIntent);
     }
-    class TheMovieDBAPITask extends AsyncTask<URL, Void, ArrayList<MovieItem>> {
 
-        @Override
-        protected ArrayList<MovieItem> doInBackground(URL... urls) {
-            URL apiUrl = urls[0];
-            String apiResult = null;
-            ArrayList<MovieItem> moviesList = null;
-
-            try {
-                // Check if there's a network connection before making
-                // API request
-                if(NetworkUtils.isOnline(MainActivity.this)) {
-                    apiResult = NetworkUtils.getResponseFromHttpUrl(apiUrl);
-//                    Log.d(LOG_TAG, "Result: \n" + apiResult);
-
-                    moviesList = TheMovieDBJSONUtils.getMovieItemsFromJSON(apiResult);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return moviesList;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<MovieItem> movieItems) {
-            onLoadFinished(movieItems);
-        }
+    @Override
+    public void onTaskComplete(ArrayList<MovieItem> items) {
+        onLoadFinished(items);
     }
 }
