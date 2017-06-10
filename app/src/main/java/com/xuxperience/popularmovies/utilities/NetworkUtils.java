@@ -31,6 +31,10 @@ public final class NetworkUtils {
     public static final String MOST_POPULAR_ENDPOINT = "popular";
     public static final String HIGHEST_RATED_ENDPOINT = "top_rated";
 
+    /** The path for the trailers and reviews endpoints **/
+    public static final String REVIEWS_PATH = "reviews";
+    public static final String TRAILERS_PATH = "videos";
+
     /**
      * Builds the URL used to fetch movies
      *
@@ -47,6 +51,32 @@ public final class NetworkUtils {
                         .build();
 
         Log.d(LOG_TAG, "Built URI: " + builtUri);
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    /**
+     * Builds the URL for a particular movies meta-data
+     *
+     * @param movieId The movie id
+     * @param type The meta-data type (reviews, trailers etc)
+     * @return The built Uri
+     */
+    public static URL buildMovieMetaDataURL(String movieId, String type) {
+        Uri builtUri = Uri.parse(THEMOVIEDB_BASE_URL).buildUpon()
+                .appendPath(movieId)
+                .appendPath(type)
+                .appendQueryParameter(PARAM_API_KEY, BuildConfig.THE_MOVIE_DB_API_KEY)
+                .build();
+
+        Log.d(LOG_TAG, "Meta-data URI: " + builtUri);
 
         URL url = null;
         try {

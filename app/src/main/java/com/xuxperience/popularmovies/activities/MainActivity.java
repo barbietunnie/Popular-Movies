@@ -1,9 +1,11 @@
 package com.xuxperience.popularmovies.activities;
 
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,10 +16,9 @@ import android.widget.TextView;
 import com.xuxperience.popularmovies.AppConstants;
 import com.xuxperience.popularmovies.R;
 import com.xuxperience.popularmovies.adapters.MoviesAdapter;
-import com.xuxperience.popularmovies.listeners.AsyncTaskCompleteListener;
 import com.xuxperience.popularmovies.models.MovieItem;
-import com.xuxperience.popularmovies.tasks.TheMovieDBAPITask;
 import com.xuxperience.popularmovies.utilities.NetworkUtils;
+import com.xuxperience.popularmovies.utilities.TheMovieDBJSONUtils;
 
 import org.json.JSONException;
 
@@ -26,7 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity implements AdapterView.OnItemClickListener,
-        AsyncTaskCompleteListener<ArrayList<MovieItem>> {
+        LoaderManager.LoaderCallbacks<ArrayList<MovieItem>> {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String BUNDLE_ADAPTER_ITEMS = "movies";
@@ -34,6 +35,10 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
 
     // The movie sort order before state change
     public static final String BUNDLE_SORT_ORDER = "sortOrder";
+
+    // The movies loader id
+    public static final int MOVIES_LOADER_ID = 43;
+    public static final String QUERY_MOVIES_SORT_ORDER_EXTRA = "query";
 
     private GridView mGridView;
     private ProgressBar mLoadingIndicator;
@@ -54,7 +59,15 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
 
         currentSortOrder = getCurrentSortOrder();
 
-        restoreMoviesList(savedInstanceState);
+        // Initialize the loader
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> themoviedbLoader = loaderManager.getLoader(MOVIES_LOADER_ID);
+
+        if(themoviedbLoader == null) {
+            loaderManager.initLoader(MOVIES_LOADER_ID, null, this);
+        } else {
+            loaderManager.restartLoader(MOVIES_LOADER_ID, null, this);
+        }
     }
 
     @Override
@@ -67,39 +80,15 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-//        Log.d(LOG_TAG, "Previous sort order: " + currentSortOrder);
-//        Log.d(LOG_TAG, "Current sort order: " + getSharedPreferences().getString(
-//                getString(R.string.pref_sort_key),
-//                getString(R.string.pref_sort_default_value)
-//        ));
-
-        String previousSortOrder = currentSortOrder;
-        currentSortOrder = getSharedPreferences().getString(
-                getString(R.string.pref_sort_key),
-                getString(R.string.pref_sort_default_value)
-        );
-
-        if(previousSortOrder != null && mMoviesAdapter != null) {
-            if(!previousSortOrder.equals(currentSortOrder) || mMoviesAdapter.getCount() == 0) {
-                Log.i(LOG_TAG, "Loading new data from onResume");
-                loadMoviesData();
-            }
-        }
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if(outState != null && mMoviesAdapter != null) {
-            outState.putParcelableArrayList(BUNDLE_ADAPTER_ITEMS, mMoviesAdapter.getMoviesList());
-
             int scrollPosition = mGridView.getFirstVisiblePosition();
 
             outState.putInt(BUNDLE_SCROLL_POSITION, scrollPosition);
+
+            Log.d(LOG_TAG, "Saving scroll postion: " + scrollPosition);
 
             // Save the current sort order
             outState.putString(BUNDLE_SORT_ORDER,
@@ -110,50 +99,25 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         }
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        restoreMoviesList(savedInstanceState);
-    }
-
     /**
      * Restores the list of movies from the saved bundle
      *
      * @param savedInstanceState The saved bundle state
      */
-    private void restoreMoviesList(Bundle savedInstanceState) {
-        boolean loaded = false;
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
 
         if(savedInstanceState != null) {
-            ArrayList<MovieItem> moviesList = savedInstanceState.getParcelableArrayList(BUNDLE_ADAPTER_ITEMS);
-            if(moviesList != null && moviesList.size() > 0) {
-                onLoadFinished(moviesList);
+            // Restore the scroll position
+            int scrollPosition = savedInstanceState.getInt(BUNDLE_SCROLL_POSITION);
 
-                loaded = true;
+//            Log.d(LOG_TAG, "Restore state: Scroll Position: " + scrollPosition);
 
-                // Restore the scroll position
-                int scrollPosition = savedInstanceState.getInt(BUNDLE_SCROLL_POSITION);
-                if(scrollPosition > 0) {
-                    mGridView.smoothScrollToPosition(scrollPosition);
-                }
+            if(scrollPosition > 0) {
+                mGridView.smoothScrollToPosition(scrollPosition);
             }
         }
-
-        if(!loaded) {
-//            Log.d(LOG_TAG, "No saved movies found");
-            loadMoviesData();
-        }
-    }
-
-    private void loadMoviesData() {
-        showLoadingIndicator();
-
-        URL moviesURL = NetworkUtils.buildURL(getSharedPreferences().getString(
-                getString(R.string.pref_sort_key),
-                getString(R.string.pref_sort_default_value)
-        ));
-        new TheMovieDBAPITask(this, this).execute(moviesURL);
     }
 
     /**
@@ -188,20 +152,6 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         mLoadingIndicator.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Called when the movies have been loaded from theMovieDB
-     */
-    public void onLoadFinished(ArrayList<MovieItem> movies) {
-        if(movies != null && movies.size() > 0)  {
-            mMoviesAdapter = new MoviesAdapter(this, movies);
-            mGridView.setAdapter(mMoviesAdapter);
-
-            showMoviesList();
-        } else { // An error must have occurred
-            showErrorMessage("Oops! It seems you're not connected to the internet. \nKindly check your internet settings");
-        }
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MovieItem selectedMovieItem = mMoviesAdapter.getItem(position);
@@ -209,15 +159,6 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
         Intent detailActivityIntent = new Intent(this, DetailActivity.class);
         detailActivityIntent.putExtra(AppConstants.MOVIE_INTENT_KEY, selectedMovieItem);
         startActivity(detailActivityIntent);
-    }
-
-    /**
-     * Callback that is invoked when TheMovieDBAPITask completes
-     * @param items
-     */
-    @Override
-    public void onTaskComplete(ArrayList<MovieItem> items) {
-        onLoadFinished(items);
     }
 
     /**
@@ -230,5 +171,68 @@ public class MainActivity extends BaseActivity implements AdapterView.OnItemClic
                 getString(R.string.pref_sort_key),
                 getString(R.string.pref_sort_default_value)
         );
+    }
+
+    @Override
+    public Loader<ArrayList<MovieItem>> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<ArrayList<MovieItem>>(this) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+
+                // Show the loading indicator
+                showLoadingIndicator();
+
+                // Force a load
+                forceLoad();
+            }
+
+            @Override
+            public ArrayList<MovieItem> loadInBackground() {
+                try {
+                    // Check if there's a network connection before making
+                    // API request
+                    if(NetworkUtils.isOnline(getContext())) {
+                        URL moviesApiURL = NetworkUtils.buildURL(getSharedPreferences().getString(
+                                getString(R.string.pref_sort_key),
+                                getString(R.string.pref_sort_default_value)
+                        ));
+
+                        String apiResult = NetworkUtils.getResponseFromHttpUrl(moviesApiURL);
+                        Log.d(LOG_TAG, "Result: \n" + apiResult);
+
+                        return TheMovieDBJSONUtils.getMovieItemsFromJSON(apiResult);
+                    }
+
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                    return null;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                    return null;
+                }
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<MovieItem>> loader, ArrayList<MovieItem> moviesList) {
+        if(moviesList != null && moviesList.size() > 0)  {
+            mMoviesAdapter = new MoviesAdapter(this, moviesList);
+            mGridView.setAdapter(mMoviesAdapter);
+
+            showMoviesList();
+        } else { // An error must have occurred
+            showErrorMessage("Oops! It seems you're not connected to the internet. " +
+                    "\nKindly check your internet settings");
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<MovieItem>> loader) {
+
     }
 }

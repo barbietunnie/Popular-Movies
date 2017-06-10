@@ -15,7 +15,7 @@ import com.xuxperience.popularmovies.models.MovieItem;
 import java.util.ArrayList;
 
 /**
- * The Movies adapter
+ * Basic Movies adapter
  *
  * Created by badeyemi on 4/30/17.
  */
@@ -74,8 +74,8 @@ public class MoviesAdapter extends BaseAdapter {
             ImageView posterView = (ImageView) convertView.findViewById(R.id.iv_movie_item);
             Picasso.with(this.context).load(posterThumbnailUrl).into(posterView);
 
-            TextView movieTitleView = (TextView) convertView.findViewById(R.id.tv_movie_title);
-            movieTitleView.setText(movieItem.getTitle());
+//            TextView movieTitleView = (TextView) convertView.findViewById(R.id.tv_movie_title);
+//            movieTitleView.setText(movieItem.getTitle());
         }
 
         return convertView;

@@ -3,8 +3,11 @@ package com.xuxperience.popularmovies.activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
 import com.xuxperience.popularmovies.AppConstants;
@@ -62,5 +65,19 @@ public class DetailActivity extends BaseActivity {
                 }
             }
         }
+    }
+
+    /**
+     * Invoked when the favorite button is clicked
+     *
+     * @param view
+     */
+    public void onFavoriteClicked(View view) {
+        ToggleButton toggleButton = (ToggleButton) view;
+
+        boolean markAsFavorite = toggleButton.isChecked();
+
+        // TODO: Save in database or remove from database
+        // based on the choice selected
     }
 }

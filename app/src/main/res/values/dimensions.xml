@@ -3,14 +3,17 @@
     <dimen name="error_padding">8dp</dimen>
     <dimen name="error_textSize">18sp</dimen>
 
-    <dimen name="movie_list_horizontal_spacing">4dp</dimen>
-    <dimen name="movie_list_vertical_spacing">4dp</dimen>
+    <dimen name="movie_list_horizontal_spacing">2dp</dimen>
+    <dimen name="movie_list_vertical_spacing">2dp</dimen>
 
     <!-- Movie item dimensions -->
     <dimen name="movie_item_padding">5dp</dimen>
     <dimen name="movie_item_text_size">18sp</dimen>
     <dimen name="movie_item_width">183dp</dimen>
-    <dimen name="movie_item_height">250dp</dimen>
+    <dimen name="movie_item_height">300dp</dimen>
+
+    <!-- Movie favorite button -->
+    <dimen name="movie_fav_btn_margin">4dp</dimen>
 
     <!-- Movie details dimensions -->
     <dimen name="movie_details_title_padding">12dp</dimen>
